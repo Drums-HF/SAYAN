@@ -155,6 +155,34 @@ export function GraphiqueBarres({
   )
 }
 
+export function GraphiqueCategories({
+  points,
+  couleur,
+  format,
+  infobulle,
+}: {
+  points: { libelle: string; valeur: number; detail: string }[]
+  couleur: string
+  format: (v: number) => string
+  infobulle: (p: { libelle: string; valeur: number; detail: string }) => string
+}) {
+  return (
+    <Cadre>
+      <BarChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <CartesianGrid stroke="var(--surface-raised)" vertical={false} />
+        <XAxis {...AXE} dataKey="libelle" interval="preserveStartEnd" />
+        <YAxis {...AXE} width={36} tickFormatter={(v: number) => format(v)} allowDecimals={false} />
+        <Tooltip
+          {...INFOBULLE}
+          cursor={{ fill: 'var(--surface-raised)' }}
+          formatter={(_v, _n, item) => [infobulle(item.payload as { libelle: string; valeur: number; detail: string })]}
+        />
+        <Bar dataKey="valeur" fill={couleur} radius={[3, 3, 0, 0]} maxBarSize={28} isAnimationActive={false} />
+      </BarChart>
+    </Cadre>
+  )
+}
+
 export function GraphiqueLigne({
   points,
   couleur,
