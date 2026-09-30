@@ -457,3 +457,35 @@ input[type="search"]::-webkit-search-cancel-button {
   display: inline-block;
   width: 16px;
 }
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--rayon);
+  overflow: hidden;
+  font-size: 15px;
+}
+
+.tableau th,
+.tableau td {
+  padding: 9px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tableau th:first-child,
+.tableau td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+.tableau th {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.tableau tbody tr + tr td {
+  box-shadow: inset 0 1px 0 var(--surface-raised);
+}
