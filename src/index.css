@@ -131,7 +131,7 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
   gap: 12px;
 }
 
-.ligne > .etire {
+.etire {
   flex: 1;
   min-width: 0;
 }
@@ -282,6 +282,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  text-decoration: none;
 }
 
 .bouton.principal {
@@ -314,6 +315,40 @@ button {
   background: var(--surface-raised);
   color: var(--text);
   font-size: 20px;
+}
+
+.segments {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--gouttiere));
+  padding: 0 var(--gouttiere);
+}
+
+.segments::-webkit-scrollbar {
+  display: none;
+}
+
+.segments button {
+  flex: none;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.segments button.actif {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
 }
 
 /* ---------- Mesures ---------- */

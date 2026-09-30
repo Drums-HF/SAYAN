@@ -10,7 +10,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "db:push": "scripts/db-push.sh",
-    "test:rls": "vitest run --config vitest.rls.config.ts"
+    "test:rls": "vitest run --config vitest.rls.config.ts",
+    "ciqual": "node scripts/build-ciqual.ts data/ciqual-2025.xlsx"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
