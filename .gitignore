@@ -15,3 +15,6 @@ SPEC.original.md
 # CLI Supabase
 supabase/.temp
 supabase/.branches
+
+# Réglages locaux de Claude Code
+.claude/

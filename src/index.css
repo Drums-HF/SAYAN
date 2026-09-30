@@ -1,9 +1,44 @@
+/* SPEC §11 — thème sombre unique, jetons de couleur modifiables en un seul endroit.
+   Les couleurs n'ont aucune valeur sémantique : elles ne servent qu'à distinguer des séries. */
 :root {
-  --bg: #000000;
-  --text: #F5F5F5;
+  /* Fonds */
+  --bg:              #000000;
+  --surface:         #0E0E0E;
+  --surface-raised:  #171717;
+  --border:          #262626;
+
+  /* Texte */
+  --text:            #F5F5F5;
+  --text-muted:      #A3A3A3;
+  --text-faint:      #6B6B6B;
+
+  /* Accent unique */
+  --accent:          #4F7CFF;
+
+  /* Séries de graphiques */
+  --serie-kcal:      #4F7CFF;
+  --serie-proteines: #A78BFA;
+  --serie-glucides:  #38BDF8;
+  --serie-lipides:   #FB923C;
+  --serie-fibres:    #34D399;
+  --serie-poids:     #F5F5F5;
+  --serie-objectif:  #6B6B6B;
+
+  --rayon: 14px;
+  --gouttiere: 16px;
 
   color-scheme: dark;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.35;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
@@ -16,4 +51,322 @@ body,
 body {
   background: var(--bg);
   color: var(--text);
+  font-variant-numeric: tabular-nums;
+  overscroll-behavior: none;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
+
+/* ---------- Structure ---------- */
+
+.ecran {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.contenu {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding:
+    calc(env(safe-area-inset-top) + var(--gouttiere))
+    max(var(--gouttiere), env(safe-area-inset-right))
+    calc(var(--gouttiere) * 2)
+    max(var(--gouttiere), env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contenu.centre {
+  justify-content: center;
+}
+
+.onglets {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--surface);
+  padding:
+    0
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.onglets a {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.onglets a.active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.carte {
+  background: var(--surface);
+  border-radius: var(--rayon);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ligne > .etire {
+  flex: 1;
+  min-width: 0;
+}
+
+.entre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.grille-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.attenue { color: var(--text-muted); }
+.discret { color: var(--text-faint); }
+.petit { font-size: 14px; }
+.grand { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+.droite { text-align: right; }
+.tronque { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Listes ---------- */
+
+.liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border-radius: var(--rayon);
+  overflow: hidden;
+}
+
+.liste > li + li {
+  box-shadow: inset 0 1px 0 var(--surface-raised);
+}
+
+.liste button.element,
+.liste .element {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+/* ---------- Champs ---------- */
+
+label.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+}
+
+input[type="date"],
+input[type="month"] {
+  min-width: 0;
+}
+
+select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+input[type="checkbox"] {
+  width: 24px;
+  min-height: 24px;
+  height: 24px;
+  padding: 0;
+  flex: none;
+  border-radius: 6px;
+  display: grid;
+  place-content: center;
+}
+
+input[type="checkbox"]:checked {
+  background: var(--accent);
+}
+
+input[type="checkbox"]:checked::after {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  transform: translateY(-2px) rotate(-45deg);
+}
+
+/* ---------- Boutons ---------- */
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.bouton {
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bouton.principal {
+  background: var(--accent);
+  color: var(--text);
+}
+
+.bouton.plein {
+  width: 100%;
+}
+
+.bouton.lien {
+  background: none;
+  min-height: 44px;
+  padding: 10px 4px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.bouton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.bouton-carre {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 20px;
+}
+
+/* ---------- Mesures ---------- */
+
+.barre {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.barre > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.message {
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface-raised);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.indicateur {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--surface-raised);
+  border-top-color: var(--text-muted);
+  animation: tourne 0.9s linear infinite;
+  flex: none;
+}
+
+@keyframes tourne {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Graphiques ---------- */
+
+.graphique {
+  width: 100%;
+  height: 220px;
+}
+
+@media (orientation: landscape) {
+  .graphique {
+    height: 300px;
+  }
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 12px;
 }
