@@ -38,6 +38,7 @@ describe('import Open Food Facts', () => {
         nom: 'Skyr nature 0 %',
         marque: "Siggi's",
         code_barres: CODE,
+        image: 'https://images.openfoodfacts.org/images/products/303/349/123/4567/front_fr.3.200.jpg',
         kcal: 63,
         glucides: 4,
         proteines: 11,

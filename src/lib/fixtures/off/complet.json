@@ -6,6 +6,7 @@
     "product_name": "Skyr nature",
     "product_name_fr": "Skyr nature 0 %",
     "brands": "Siggi's, Arla",
+    "image_front_small_url": "https://images.openfoodfacts.org/images/products/303/349/123/4567/front_fr.3.200.jpg",
     "nutriments": {
       "energy-kcal_100g": 63,
       "energy-kj_100g": 266,

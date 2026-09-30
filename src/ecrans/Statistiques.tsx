@@ -1,38 +1,60 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useDonnees, useProfil } from '../contexte.ts'
 import { useDerives } from '../derives.ts'
-import { deficitCumule, depenseJournaliere, type Totaux } from '../lib/calculs.ts'
-import { ajouterJours, aujourdhui, horodatage, libelleCourt, libelleMois, libelleMoisCourt, plageJours } from '../lib/dates.ts'
-import { formatEstimation, formatGrammes, formatKcal } from '../lib/nombres.ts'
-import { fenetrePoids, serieJournaliere, seriePoids } from '../lib/series.ts'
-import { dernieresSemaines, derniersMois, moyennePlage, regularite, type Moyenne } from '../lib/statistiques.ts'
-import { EnTete } from '../ui/composants.tsx'
+import { courbeLissee, deficitCumule, depenseJournaliere, moyenne7, type Totaux } from '../lib/calculs.ts'
+import {
+  ajouterJours,
+  aujourdhui,
+  horodatage,
+  libelleCourt,
+  libelleMois,
+  libelleMoisCourt,
+  plageJours,
+  premierJourDuMois,
+} from '../lib/dates.ts'
+import { formatEstimation, formatGrammes, formatKcal, formatKg, formatKgSigne } from '../lib/nombres.ts'
+import { serieJournaliere, seriePoids } from '../lib/series.ts'
+import {
+  dernieresSemaines,
+  derniersMois,
+  evolutionPoids,
+  joursRenseignes,
+  moyennePlage,
+  regularite,
+  type Moyenne,
+} from '../lib/statistiques.ts'
+import { EnTete, Segments, Tuile } from '../ui/composants.tsx'
 import { GraphiqueBarres, GraphiqueCategories, GraphiquePoids } from '../ui/graphiques.tsx'
 import { Legende } from './Pesee.tsx'
 
-const JOURS_GRAPHIQUES = 30
+type Periode = '7' | '30' | '90'
+const PERIODES: { valeur: Periode; libelle: string }[] = [
+  { valeur: '7', libelle: '7 j' },
+  { valeur: '30', libelle: '30 j' },
+  { valeur: '90', libelle: '90 j' },
+]
 const SEMAINES = 8
 const MOIS = 6
 
-const entier = (v: number) => formatKcal(v)
 const grammes = (v: number) => formatGrammes(v).replace(/,0$/, '')
 
 export default function Statistiques() {
   const { pesees, jalons } = useDonnees()
   const profil = useProfil()
   const { totauxJours } = useDerives()
+  const [periode, setPeriode] = useState<Periode>('30')
   const jour = aujourdhui()
-  const debut = ajouterJours(jour, -(JOURS_GRAPHIQUES - 1))
+  const debut = ajouterJours(jour, -(Number(periode) - 1))
+  const plage = { debut, fin: jour }
   const t0 = horodatage(debut)
   const t1 = horodatage(jour)
 
   const serie = (cle: keyof Totaux) => serieJournaliere(debut, jour, (j) => totauxJours.get(j)?.[cle])
-
   const deficits = serieJournaliere(debut, jour, (j) => {
     const t = totauxJours.get(j)
     return t ? depenseJournaliere(profil, pesees, j) - t.kcal : null
   })
-  const cumul30 = deficitCumule(plageJours(debut, jour), profil, pesees, totauxJours)
+  const cumulPeriode = deficitCumule(plageJours(debut, jour), profil, pesees, totauxJours)
   const cumulTotal = deficitCumule(
     profil.date_debut <= jour ? plageJours(profil.date_debut, jour) : [],
     profil,
@@ -40,8 +62,11 @@ export default function Statistiques() {
     totauxJours,
   )
 
-  const { debut: debutPoids, fin: finPoids } = fenetrePoids(pesees, profil, jalons, jour, 'tout')
-  const pointsPoids = seriePoids(pesees, profil, jalons, debutPoids, finPoids)
+  const moyenne = moyennePlage(totauxJours, plage)
+  const evolution = evolutionPoids(courbeLissee(pesees), plage)
+  const regulier = joursRenseignes(totauxJours, plage)
+  const moyenneJour = moyenne7(pesees, jour)
+  const jalonDuMois = jalons.find((j) => j.mois === premierJourDuMois(jour))
 
   const semaines = dernieresSemaines(jour, SEMAINES).map((p) => moyennePlage(totauxJours, p))
   const mois = derniersMois(jour, MOIS).map((p) => moyennePlage(totauxJours, p))
@@ -53,28 +78,46 @@ export default function Statistiques() {
 
   return (
     <div className="contenu">
-      <EnTete titre="Statistiques" />
+      <EnTete titre="Statistiques" action={<Segments options={PERIODES} valeur={periode} surChoix={setPeriode} />} />
 
-      <Bloc titre="Calories par jour" sousTitre={`30 jours · objectif ${formatKcal(profil.objectif_calorique)} kcal`}>
+      <div className="tuiles">
+        <Tuile libelle="kcal / jour" valeur={moyenne.kcal === null ? '—' : formatKcal(moyenne.kcal)} />
+        <Tuile
+          libelle="poids, période"
+          valeur={evolution === null ? '—' : formatKgSigne(evolution)}
+          unite={evolution === null ? undefined : 'kg'}
+        />
+        <Tuile libelle="jours renseignés" valeur={regulier.renseignes} unite={`/ ${regulier.total}`} />
+      </div>
+
+      <Carte titre="Calories" detail={`objectif ${formatKcal(profil.objectif_calorique)}`}>
         <GraphiqueBarres
           points={serie('kcal')}
           couleur="var(--serie-kcal)"
           unite="kcal"
-          format={entier}
+          format={formatKcal}
           reference={profil.objectif_calorique}
           debut={t0}
           fin={t1}
         />
-      </Bloc>
+      </Carte>
 
-      <Bloc titre="Moyennes" sousTitre="Jours renseignés uniquement">
-        <TableMoyennes titre="Semaine du" lignes={semaines} libelle={(m) => `${libelleCourt(m.plage.debut)}`} />
-        <TableMoyennes titre="Mois" lignes={mois} libelle={(m) => libelleMois(m.plage.debut)} />
-      </Bloc>
+      <Carte
+        titre="Poids"
+        detail={[
+          moyenneJour === null ? null : `${formatKg(moyenneJour)} kg`,
+          jalonDuMois ? `jalon ${formatKg(jalonDuMois.poids_cible_kg)}` : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')}
+      >
+        <GraphiquePoids points={seriePoids(pesees, profil, jalons, debut, jour)} debut={t0} fin={t1} />
+        <Legende />
+      </Carte>
 
-      <Bloc
-        titre="Protéines par jour"
-        sousTitre={profil.objectif_proteines_g ? `objectif ${grammes(profil.objectif_proteines_g)} g` : '30 jours'}
+      <Carte
+        titre="Protéines"
+        detail={profil.objectif_proteines_g ? `objectif ${grammes(profil.objectif_proteines_g)} g` : undefined}
       >
         <GraphiqueBarres
           points={serie('proteines')}
@@ -85,19 +128,19 @@ export default function Statistiques() {
           debut={t0}
           fin={t1}
         />
-      </Bloc>
+      </Carte>
 
-      <Bloc titre="Glucides par jour" sousTitre="30 jours">
+      <Carte titre="Glucides">
         <GraphiqueBarres points={serie('glucides')} couleur="var(--serie-glucides)" unite="g" format={grammes} debut={t0} fin={t1} />
-      </Bloc>
-      <Bloc titre="Lipides par jour" sousTitre="30 jours">
+      </Carte>
+      <Carte titre="Lipides">
         <GraphiqueBarres points={serie('lipides')} couleur="var(--serie-lipides)" unite="g" format={grammes} debut={t0} fin={t1} />
-      </Bloc>
-      <Bloc titre="Fibres par jour" sousTitre="30 jours">
+      </Carte>
+      <Carte titre="Fibres">
         <GraphiqueBarres points={serie('fibres')} couleur="var(--serie-fibres)" unite="g" format={grammes} debut={t0} fin={t1} />
-      </Bloc>
+      </Carte>
 
-      <Bloc titre="Déficit estimé par jour" sousTitre="30 jours · estimation, coefficient d’activité forfaitaire">
+      <Carte titre="Déficit estimé" detail="coefficient d’activité forfaitaire">
         <GraphiqueBarres
           points={deficits}
           couleur="var(--serie-kcal)"
@@ -106,35 +149,28 @@ export default function Statistiques() {
           debut={t0}
           fin={t1}
         />
-        <div className="carte">
-          <LigneCumul libelle="Cumul sur 30 jours" cumul={cumul30} />
-          <LigneCumul libelle="Cumul depuis le début" cumul={cumulTotal} />
-        </div>
-      </Bloc>
+        <LigneCumul libelle="Cumul sur la période" cumul={cumulPeriode} />
+        <LigneCumul libelle="Cumul depuis le début" cumul={cumulTotal} />
+      </Carte>
 
-      <Bloc titre="Poids et trajectoire" sousTitre="Depuis le début du suivi">
-        <GraphiquePoids points={pointsPoids} debut={horodatage(debutPoids)} fin={horodatage(finPoids)} />
-        <Legende />
-      </Bloc>
+      <Carte titre="Moyennes" detail="jours renseignés uniquement">
+        <TableMoyennes titre="Semaine du" lignes={semaines} libelle={(m) => libelleCourt(m.plage.debut)} />
+        <TableMoyennes titre="Mois" lignes={mois} libelle={(m) => libelleMois(m.plage.debut)} />
+      </Carte>
 
-      <Bloc titre="Régularité de la saisie" sousTitre="Jours renseignés par mois">
-        <GraphiqueCategories
-          points={assiduite}
-          couleur="var(--serie-kcal)"
-          format={(v) => String(v)}
-          infobulle={(p) => p.detail}
-        />
-      </Bloc>
+      <Carte titre="Régularité" detail="jours renseignés par mois">
+        <GraphiqueCategories points={assiduite} couleur="var(--serie-kcal)" format={(v) => String(v)} infobulle={(p) => p.detail} />
+      </Carte>
     </div>
   )
 }
 
-function Bloc({ titre, sousTitre, children }: { titre: string; sousTitre?: string; children: ReactNode }) {
+function Carte({ titre, detail, children }: { titre: string; detail?: string; children: ReactNode }) {
   return (
-    <section className="pile" style={{ gap: 10, marginTop: 8 }}>
-      <div>
+    <section className="carte">
+      <div className="carte-titre">
         <h2>{titre}</h2>
-        {sousTitre && <p className="petit discret">{sousTitre}</p>}
+        {detail && <span className="petit discret">{detail}</span>}
       </div>
       {children}
     </section>
@@ -144,7 +180,7 @@ function Bloc({ titre, sousTitre, children }: { titre: string; sousTitre?: strin
 function LigneCumul({ libelle, cumul }: { libelle: string; cumul: { somme: number; jours: number } }) {
   return (
     <div className="entre">
-      <span className="attenue">{libelle}</span>
+      <span className="petit attenue">{libelle}</span>
       <span className="droite">
         {cumul.jours ? `${formatEstimation(cumul.somme)} kcal` : '—'}
         <span className="petit discret">
@@ -156,15 +192,7 @@ function LigneCumul({ libelle, cumul }: { libelle: string; cumul: { somme: numbe
   )
 }
 
-function TableMoyennes({
-  titre,
-  lignes,
-  libelle,
-}: {
-  titre: string
-  lignes: Moyenne[]
-  libelle: (m: Moyenne) => string
-}) {
+function TableMoyennes({ titre, lignes, libelle }: { titre: string; lignes: Moyenne[]; libelle: (m: Moyenne) => string }) {
   return (
     <table className="tableau">
       <thead>

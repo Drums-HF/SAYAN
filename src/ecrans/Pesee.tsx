@@ -5,7 +5,7 @@ import { aujourdhui, estDateValide, horodatage, libelleCourt, libelleJour } from
 import { formatKg, formatKgSigne } from '../lib/nombres.ts'
 import { fenetrePoids, PERIODES, seriePoids, type Periode } from '../lib/series.ts'
 import { lirePoids } from '../lib/validation.ts'
-import { EnTete, Segments } from '../ui/composants.tsx'
+import { EnTete, Segments, Tuile } from '../ui/composants.tsx'
 import { GraphiquePoids } from '../ui/graphiques.tsx'
 
 const HISTORIQUE_INITIAL = 14
@@ -24,10 +24,11 @@ export default function Pesee() {
 
   const moyenne = moyenne7(pesees, jour)
   const ecart = ecartTrajectoire(pesees, profil, jalons, jour)
+  const historique = [...pesees].sort((a, b) => b.date.localeCompare(a.date))
+  const derniere = historique[0]
 
   const { debut, fin } = fenetrePoids(pesees, profil, jalons, jour, periode)
   const points = useMemo(() => seriePoids(pesees, profil, jalons, debut, fin), [pesees, profil, jalons, debut, fin])
-  const historique = [...pesees].sort((a, b) => b.date.localeCompare(a.date))
 
   async function enregistrer(e: FormEvent) {
     e.preventDefault()
@@ -74,6 +75,26 @@ export default function Pesee() {
     <div className="contenu">
       <EnTete titre="Pesée" />
 
+      <div className="tuile" style={{ padding: '16px 18px' }}>
+        <span className="libelle">Moyenne 7 jours</span>
+        <span className="valeur" style={{ fontSize: 40 }}>
+          {moyenne === null ? '—' : formatKg(moyenne)}
+          {moyenne !== null && <small>kg</small>}
+        </span>
+      </div>
+      <div className="tuiles">
+        <Tuile
+          libelle={derniere ? `Pesée du ${libelleCourt(derniere.date)}` : 'Dernière pesée'}
+          valeur={derniere ? formatKg(derniere.kg) : '—'}
+          unite={derniere ? 'kg' : undefined}
+        />
+        <Tuile
+          libelle="Écart à la trajectoire"
+          valeur={ecart === null ? '—' : formatKgSigne(ecart)}
+          unite={ecart === null ? undefined : 'kg'}
+        />
+      </div>
+
       <form className="carte" onSubmit={enregistrer}>
         <div className="grille-2">
           <label className="champ">
@@ -82,7 +103,7 @@ export default function Pesee() {
           </label>
           <label className="champ">
             Poids (kg)
-            <input inputMode="decimal" value={kg} onChange={(e) => setKg(e.target.value)} />
+            <input inputMode="decimal" placeholder="0,0" value={kg} onChange={(e) => setKg(e.target.value)} />
           </label>
         </div>
         {message && <p className="message">{message}</p>}
@@ -92,25 +113,17 @@ export default function Pesee() {
       </form>
 
       <section className="carte">
-        <div className="entre">
-          <span className="attenue">Moyenne 7 jours</span>
-          <span>{moyenne === null ? 'indisponible' : `${formatKg(moyenne)} kg`}</span>
+        <div className="carte-titre">
+          <h2>Courbe</h2>
+          <Segments options={PERIODES} valeur={periode} surChoix={setPeriode} />
         </div>
-        <div className="entre">
-          <span className="attenue">Écart à la trajectoire</span>
-          <span>{ecart === null ? 'indisponible' : `${formatKgSigne(ecart)} kg`}</span>
-        </div>
-      </section>
-
-      <section className="pile" style={{ gap: 12 }}>
-        <Segments options={PERIODES} valeur={periode} surChoix={setPeriode} />
         <GraphiquePoids points={points} debut={horodatage(debut)} fin={horodatage(fin)} />
         <Legende />
       </section>
 
       {historique.length > 0 && (
         <section className="pile">
-          <h3>Historique</h3>
+          <h3>Historique · toucher une pesée pour la supprimer</h3>
           <ul className="liste">
             {(toutAfficher ? historique : historique.slice(0, HISTORIQUE_INITIAL)).map((p) => (
               <li key={p.id}>
@@ -126,7 +139,6 @@ export default function Pesee() {
               Afficher les {historique.length} pesées
             </button>
           )}
-          <p className="petit discret">Toucher une pesée pour la supprimer.</p>
         </section>
       )}
     </div>

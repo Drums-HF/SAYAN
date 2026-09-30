@@ -1,10 +1,11 @@
 /* SPEC §11 — thème sombre unique, jetons de couleur modifiables en un seul endroit.
-   Les couleurs n'ont aucune valeur sémantique : elles ne servent qu'à distinguer des séries. */
+   Les couleurs n'ont aucune valeur sémantique : elles ne servent qu'à distinguer des séries.
+   Langage visuel : cartes arrondies, grands chiffres, accent unique vert citron. */
 :root {
   /* Fonds */
   --bg:              #000000;
-  --surface:         #0E0E0E;
-  --surface-raised:  #171717;
+  --surface:         #111111;
+  --surface-raised:  #1C1C1C;
   --border:          #262626;
 
   /* Texte */
@@ -12,11 +13,12 @@
   --text-muted:      #A3A3A3;
   --text-faint:      #6B6B6B;
 
-  /* Accent unique */
-  --accent:          #4F7CFF;
+  /* Accent unique, et texte posé dessus */
+  --accent:          #C8F560;
+  --sur-accent:      #0B0B0B;
 
   /* Séries de graphiques */
-  --serie-kcal:      #4F7CFF;
+  --serie-kcal:      #C8F560;
   --serie-proteines: #A78BFA;
   --serie-glucides:  #38BDF8;
   --serie-lipides:   #FB923C;
@@ -24,7 +26,8 @@
   --serie-poids:     #F5F5F5;
   --serie-objectif:  #6B6B6B;
 
-  --rayon: 14px;
+  --rayon: 16px;
+  --rayon-petit: 12px;
   --gouttiere: 16px;
 
   color-scheme: dark;
@@ -59,9 +62,14 @@ h1, h2, h3, p {
   margin: 0;
 }
 
-h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; }
-h2 { font-size: 20px; font-weight: 600; }
-h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+h2 { font-size: 17px; font-weight: 600; }
+h3 { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
 
 /* ---------- Structure ---------- */
 
@@ -73,6 +81,7 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
 
 .contenu {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding:
@@ -82,68 +91,85 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
     max(var(--gouttiere), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+}
+
+/* Les enfants gardent leur hauteur : c'est la zone qui défile, jamais un enfant qui se comprime. */
+.contenu > * {
+  flex-shrink: 0;
 }
 
 .contenu.centre {
   justify-content: center;
 }
 
-.pied {
+.entete {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px max(var(--gouttiere), env(safe-area-inset-right)) 10px max(var(--gouttiere), env(safe-area-inset-left));
-  font-size: 15px;
+  padding-top: 4px;
+}
+
+.surtitre {
+  font-size: 14px;
   color: var(--text-muted);
+  margin-bottom: 2px;
 }
 
-.date-journal {
-  position: relative;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  font-weight: 600;
-  text-align: center;
-}
+/* ---------- Barre d'onglets flottante ---------- */
 
-/* Sélecteur de date natif, invisible, posé sur le libellé : changement de date en un geste. */
-.date-journal input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  min-height: 0;
-  padding: 0;
-}
-
-.onglets {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  background: var(--surface);
+.barre-onglets {
   padding:
-    0
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+    6px
+    max(var(--gouttiere), env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom))
+    max(var(--gouttiere), env(safe-area-inset-left));
 }
 
-.onglets a {
-  min-height: 50px;
+.pilule {
+  display: grid;
+  grid-template-columns: 1fr 1fr 72px 1fr 1fr;
+  align-items: center;
+  height: 64px;
+  border-radius: 32px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--surface-raised);
+}
+
+.pilule a.onglet {
+  height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 3px;
   color: var(--text-faint);
-  text-decoration: none;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
 }
 
-.onglets a.active {
+.pilule a.onglet.active {
   color: var(--text);
-  font-weight: 600;
 }
+
+.pilule a.onglet.active svg {
+  color: var(--accent);
+}
+
+.bouton-plus {
+  justify-self: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: var(--sur-accent);
+  display: grid;
+  place-items: center;
+}
+
+/* ---------- Cartes et tuiles ---------- */
 
 .carte {
   background: var(--surface);
@@ -152,6 +178,53 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.carte-titre {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tuiles {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 10px;
+}
+
+.tuile {
+  background: var(--surface);
+  border-radius: var(--rayon-petit);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.carte .tuile {
+  background: var(--surface-raised);
+}
+
+.tuile .libelle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tuile .valeur {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.tuile .valeur small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 2px;
 }
 
 .ligne {
@@ -181,15 +254,49 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
 .grille-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .attenue { color: var(--text-muted); }
 .discret { color: var(--text-faint); }
 .petit { font-size: 14px; }
+.tres-petit { font-size: 12px; }
 .grand { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
 .droite { text-align: right; }
+.accent { color: var(--accent); }
 .tronque { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Anneau de progression ---------- */
+
+.anneau {
+  position: relative;
+  width: 232px;
+  height: 232px;
+  margin: 4px auto 0;
+}
+
+.anneau svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.anneau .centre-anneau {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.anneau .chiffre {
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
 
 /* ---------- Listes ---------- */
 
@@ -206,10 +313,9 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
   box-shadow: inset 0 1px 0 var(--surface-raised);
 }
 
-.liste button.element,
 .liste .element {
   width: 100%;
-  min-height: 52px;
+  min-height: 56px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -221,13 +327,28 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text-muted); }
   text-align: left;
 }
 
+.liste .element:disabled {
+  color: inherit;
+  opacity: 0.55;
+}
+
+.liste .element .sous-titre {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.liste .element.ajout {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* ---------- Champs ---------- */
 
 label.champ {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 
@@ -235,17 +356,21 @@ input,
 select,
 textarea {
   width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
+  min-height: 50px;
+  padding: 13px 16px;
   background: var(--surface-raised);
   color: var(--text);
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--rayon-petit);
   font: inherit;
   font-size: 17px;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
+}
+
+input::placeholder {
+  color: var(--text-faint);
 }
 
 input:focus,
@@ -257,6 +382,10 @@ textarea:focus {
 input[type="date"],
 input[type="month"] {
   min-width: 0;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
 }
 
 select {
@@ -274,7 +403,7 @@ input[type="checkbox"] {
   height: 24px;
   padding: 0;
   flex: none;
-  border-radius: 6px;
+  border-radius: 7px;
   display: grid;
   place-content: center;
 }
@@ -287,9 +416,30 @@ input[type="checkbox"]:checked::after {
   content: "";
   width: 10px;
   height: 6px;
-  border-left: 2px solid var(--text);
-  border-bottom: 2px solid var(--text);
+  border-left: 2px solid var(--sur-accent);
+  border-bottom: 2px solid var(--sur-accent);
   transform: translateY(-2px) rotate(-45deg);
+}
+
+.champ-grammes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-raised);
+  border-radius: var(--rayon);
+  padding: 6px 18px;
+}
+
+.champ-grammes input {
+  background: none;
+  border: 0;
+  padding: 10px 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.champ-grammes input:focus {
+  border: 0;
 }
 
 /* ---------- Boutons ---------- */
@@ -300,10 +450,10 @@ button {
 }
 
 .bouton {
-  min-height: 48px;
+  min-height: 50px;
   padding: 12px 18px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--rayon-petit);
   background: var(--surface-raised);
   color: var(--text);
   font-weight: 600;
@@ -316,7 +466,10 @@ button {
 
 .bouton.principal {
   background: var(--accent);
-  color: var(--text);
+  color: var(--sur-accent);
+  border-radius: 28px;
+  min-height: 56px;
+  font-size: 17px;
 }
 
 .bouton.plein {
@@ -336,23 +489,44 @@ button {
   cursor: default;
 }
 
-.bouton-carre {
-  min-width: 44px;
-  min-height: 44px;
+.bouton-rond {
+  width: 44px;
+  height: 44px;
+  flex: none;
   border: 0;
-  border-radius: 12px;
-  background: var(--surface-raised);
+  border-radius: 50%;
+  background: var(--surface);
   color: var(--text);
-  font-size: 20px;
+  display: grid;
+  place-items: center;
 }
 
-.segments {
+.bouton-rond:disabled {
+  opacity: 0.3;
+}
+
+.puces {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
-  margin: 0 calc(-1 * var(--gouttiere));
-  padding: 0 var(--gouttiere);
+}
+
+.puces::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Contrôle segmenté ---------- */
+
+.segments {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 22px;
+  background: var(--surface);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .segments::-webkit-scrollbar {
@@ -364,8 +538,8 @@ button {
   min-height: 36px;
   padding: 6px 14px;
   border: 0;
-  border-radius: 18px;
-  background: var(--surface);
+  border-radius: 19px;
+  background: none;
   color: var(--text-muted);
   font-size: 15px;
   font-weight: 500;
@@ -374,17 +548,19 @@ button {
 .segments button.actif {
   background: var(--surface-raised);
   color: var(--text);
+  font-weight: 600;
 }
 
-input[type="search"]::-webkit-search-cancel-button {
-  -webkit-appearance: none;
+.segments.accentue button.actif {
+  background: var(--accent);
+  color: var(--sur-accent);
 }
 
 /* ---------- Mesures ---------- */
 
 .barre {
-  height: 8px;
-  border-radius: 4px;
+  height: 5px;
+  border-radius: 3px;
   background: var(--surface-raised);
   overflow: hidden;
 }
@@ -393,14 +569,14 @@ input[type="search"]::-webkit-search-cancel-button {
   display: block;
   height: 100%;
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .message {
   font-size: 15px;
   color: var(--text);
   background: var(--surface-raised);
-  border-radius: 12px;
+  border-radius: var(--rayon-petit);
   padding: 12px 14px;
 }
 
@@ -418,16 +594,197 @@ input[type="search"]::-webkit-search-cancel-button {
   to { transform: rotate(360deg); }
 }
 
+/* ---------- Journal ---------- */
+
+.jours {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -10px;
+}
+
+.jours button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+}
+
+.jours button:disabled {
+  opacity: 0.25;
+}
+
+.date-choix {
+  position: relative;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 8px 2px;
+}
+
+/* Sélecteur de date natif, invisible, posé sur le libellé : changement de date en un geste. */
+.date-choix input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  min-height: 0;
+  padding: 0;
+}
+
+.bas-journal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+/* ---------- Feuille (panneau bas) ---------- */
+
+.feuille {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding:
+    10px
+    max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feuille::before {
+  content: "";
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.produit {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.produit img {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--surface-raised);
+  flex: none;
+}
+
+.produit h2 {
+  font-size: 20px;
+}
+
+/* ---------- Scanner ---------- */
+
+.scanner {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.scanner video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner .haut {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding:
+    calc(env(safe-area-inset-top) + 10px)
+    max(var(--gouttiere), env(safe-area-inset-right))
+    10px
+    max(var(--gouttiere), env(safe-area-inset-left));
+}
+
+.scanner .haut .bouton-rond {
+  background: rgba(40, 40, 40, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.scanner .haut .segments {
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.scanner .viseur {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.scanner .cadre {
+  width: min(78vw, 340px);
+  aspect-ratio: 1.6;
+  border: 2.5px solid var(--accent);
+  border-radius: 18px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.scanner .cadre::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.scanner .bas {
+  position: relative;
+  z-index: 2;
+}
+
+.scanner .consigne {
+  text-align: center;
+  font-size: 15px;
+  color: var(--text);
+  padding: 0 24px 16px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
 /* ---------- Graphiques ---------- */
 
 .graphique {
   width: 100%;
-  height: 220px;
+  height: 200px;
 }
 
 @media (orientation: landscape) {
   .graphique {
     height: 300px;
+  }
+
+  .anneau {
+    width: 200px;
+    height: 200px;
   }
 }
 
@@ -435,15 +792,11 @@ input[type="search"]::-webkit-search-cancel-button {
   font-size: 12px;
 }
 
-.message a {
-  color: var(--accent);
-}
-
 .legende {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 16px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -461,15 +814,12 @@ input[type="search"]::-webkit-search-cancel-button {
 .tableau {
   width: 100%;
   border-collapse: collapse;
-  background: var(--surface);
-  border-radius: var(--rayon);
-  overflow: hidden;
   font-size: 15px;
 }
 
 .tableau th,
 .tableau td {
-  padding: 9px 12px;
+  padding: 9px 4px;
   text-align: right;
   white-space: nowrap;
 }
@@ -481,11 +831,32 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .tableau th {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-faint);
 }
 
-.tableau tbody tr + tr td {
+.tableau tbody tr td {
   box-shadow: inset 0 1px 0 var(--surface-raised);
+}
+
+.message a {
+  color: var(--accent);
+}
+
+/* Listes et contrôles posés dans une carte : un cran plus clair. */
+.carte .liste {
+  background: var(--surface-raised);
+}
+
+.carte .liste > li + li {
+  box-shadow: inset 0 1px 0 var(--border);
+}
+
+.carte .segments {
+  background: var(--surface-raised);
+}
+
+.carte .segments button.actif {
+  background: var(--border);
 }

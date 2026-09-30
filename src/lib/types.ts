@@ -6,6 +6,8 @@ export type Source = 'openfoodfacts' | 'ciqual' | 'manuel'
 
 /** Contenu de `profil.payload`, chiffré. */
 export interface Profil {
+  /** Facultatif, affiché dans la salutation de l'accueil. */
+  prenom?: string
   sexe: Sexe
   date_naissance: string
   taille_cm: number
