@@ -75,3 +75,9 @@ export const NIVEAUX: { valeur: NiveauActivite; libelle: string }[] = [
   { valeur: 'actif', libelle: 'Actif (6 à 7 séances par semaine)' },
   { valeur: 'tres_actif', libelle: 'Très actif (travail physique et sport)' },
 ]
+
+export const LIBELLES_SOURCE: Record<Source, string> = {
+  ciqual: 'CIQUAL',
+  openfoodfacts: 'Open Food Facts',
+  manuel: 'Manuel',
+}
