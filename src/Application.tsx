@@ -7,6 +7,7 @@ import Catalogue from './ecrans/catalogue/Catalogue.tsx'
 import EditionAliment, { NouvelAlimentManuel } from './ecrans/catalogue/EditionAliment.tsx'
 import Initialisation from './ecrans/Initialisation.tsx'
 import Journal from './ecrans/Journal.tsx'
+import Reglages from './ecrans/Reglages.tsx'
 import { Chargement } from './ui/composants.tsx'
 
 // Écrans à graphiques chargés à la demande : Recharts reste hors du chargement initial.
@@ -18,6 +19,7 @@ const ONGLETS = [
   { chemin: '/pesee', libelle: 'Pesée' },
   { chemin: '/statistiques', libelle: 'Stats' },
   { chemin: '/catalogue', libelle: 'Catalogue' },
+  { chemin: '/reglages', libelle: 'Réglages' },
 ]
 
 export default function Application() {
@@ -37,6 +39,7 @@ export default function Application() {
         <Route path="/catalogue/code-barres" element={<AjoutCodeBarres />} />
         <Route path="/catalogue/nouveau" element={<NouvelAlimentManuel />} />
         <Route path="/catalogue/:id" element={<EditionAliment />} />
+        <Route path="/reglages" element={<Reglages />} />
         <Route path="*" element={<Navigate to="/journal" replace />} />
       </Routes>
       <nav className="onglets" style={{ gridTemplateColumns: `repeat(${ONGLETS.length}, 1fr)` }}>
