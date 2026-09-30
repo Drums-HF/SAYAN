@@ -1,0 +1,12 @@
+{
+  "status": 1,
+  "product": {
+    "product_name": "Biscuit",
+    "brands": "",
+    "nutriments": {
+      "energy-kcal_100g": 480,
+      "carbohydrates_100g": 65,
+      "proteins_100g": 6
+    }
+  }
+}
