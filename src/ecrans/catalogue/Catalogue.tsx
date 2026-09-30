@@ -37,6 +37,9 @@ export default function Catalogue() {
     <div className="contenu">
       <EnTete titre="Catalogue" />
       <div className="ligne" style={{ gap: 8 }}>
+        <Link className="bouton" to="/catalogue/code-barres" style={{ flex: 1 }}>
+          Code-barres
+        </Link>
         <Link className="bouton" to="/catalogue/ciqual" style={{ flex: 1 }}>
           CIQUAL
         </Link>

@@ -405,3 +405,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .recharts-cartesian-axis-tick-value {
   font-size: 12px;
 }
+
+.message a {
+  color: var(--accent);
+}

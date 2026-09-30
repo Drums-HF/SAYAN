@@ -1,0 +1,12 @@
+{
+  "status": 1,
+  "product": {
+    "product_name": "Céréales",
+    "nutriments": {
+      "energy-kcal_100g": 300,
+      "carbohydrates_100g": 20,
+      "proteins_100g": 10,
+      "fat_100g": 5
+    }
+  }
+}

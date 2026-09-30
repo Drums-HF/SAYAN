@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { useDonnees } from './contexte.ts'
 import AjoutCiqual from './ecrans/catalogue/AjoutCiqual.tsx'
+import AjoutCodeBarres from './ecrans/catalogue/AjoutCodeBarres.tsx'
 import Catalogue from './ecrans/catalogue/Catalogue.tsx'
 import EditionAliment, { NouvelAlimentManuel } from './ecrans/catalogue/EditionAliment.tsx'
 import Initialisation from './ecrans/Initialisation.tsx'
@@ -15,6 +16,7 @@ export default function Application() {
       <Routes>
         <Route path="/catalogue" element={<Catalogue />} />
         <Route path="/catalogue/ciqual" element={<AjoutCiqual />} />
+        <Route path="/catalogue/code-barres" element={<AjoutCodeBarres />} />
         <Route path="/catalogue/nouveau" element={<NouvelAlimentManuel />} />
         <Route path="/catalogue/:id" element={<EditionAliment />} />
         <Route path="*" element={<Navigate to="/catalogue" replace />} />

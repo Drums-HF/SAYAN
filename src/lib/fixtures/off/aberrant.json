@@ -1,0 +1,12 @@
+{
+  "status": 1,
+  "product": {
+    "product_name": "Chocolat noir",
+    "nutriments": {
+      "energy-kcal_100g": 5460,
+      "carbohydrates_100g": 32,
+      "proteins_100g": 9,
+      "fat_100g": 420
+    }
+  }
+}
