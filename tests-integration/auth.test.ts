@@ -6,8 +6,10 @@ import { execFileSync } from 'node:child_process'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { deverrouiller } from '../src/lib/auth.ts'
 import { chiffrer, dechiffrer, deriverSecrets, versHex, type Chiffre } from '../src/lib/crypto.ts'
+import { depotSupabase } from '../src/lib/depot.ts'
 import { cleCourante } from '../src/lib/session.ts'
 import { supabase } from '../src/lib/supabase.ts'
+import type { Profil } from '../src/lib/types.ts'
 
 const env = process.env
 const id = crypto.randomUUID()
@@ -76,6 +78,53 @@ describe('stockage chiffré', () => {
 
     const { data } = await supabase.from('poids').select('payload').single()
     expect(await dechiffrer(cleCourante(), data!.payload as Chiffre)).toEqual({ kg: 72.4 })
+  })
+
+  it('la couche de données chiffre, remplace et relit correctement', async () => {
+    const vide = await depotSupabase.charger()
+    expect(vide.profil).toBeNull() // payload {} : initialisation non terminée
+
+    const profil: Profil = {
+      sexe: 'femme',
+      date_naissance: '1990-06-15',
+      taille_cm: 168,
+      poids_initial_kg: 70,
+      niveau_activite: 'modere',
+      objectif_calorique: 1500,
+      date_debut: '2026-09-30',
+    }
+    await depotSupabase.enregistrerProfil(profil)
+    await depotSupabase.enregistrerJalon('2026-10-01', 69)
+    await depotSupabase.enregistrerJalon('2026-10-01', 68.5) // même mois : remplace
+    await depotSupabase.enregistrerPesee('2026-09-30', 72.5) // même jour : remplace
+    const aliment = await depotSupabase.ajouterAliment({
+      nom: 'Riz blanc, cuit',
+      marque: null,
+      code_barres: null,
+      source: 'ciqual',
+      source_ref: '9102',
+      kcal_100g: 130,
+      glucides_100g: 28.2,
+      proteines_100g: 2.7,
+      lipides_100g: 0.3,
+      fibres_100g: null,
+      kcal_estimee: false,
+    })
+    await depotSupabase.ajouterEntrees([
+      { date: '2026-09-30', aliment_id: aliment.id, grammes: 152.5 },
+      { date: '2026-09-30', aliment_id: aliment.id, grammes: 20 },
+    ])
+
+    const d = await depotSupabase.charger()
+    expect(d.profil).toEqual(profil)
+    expect(d.jalons.map((j) => [j.mois, j.poids_cible_kg])).toEqual([['2026-10-01', 68.5]])
+    expect(d.pesees.map((p) => [p.date, p.kg])).toEqual([['2026-09-30', 72.5]])
+    expect(d.aliments[0]).toMatchObject({ nom: 'Riz blanc, cuit', kcal_100g: 130, fibres_100g: null })
+    expect(d.entrees.map((e) => e.grammes).sort()).toEqual([152.5, 20].sort())
+
+    const brut = sql(`select string_agg(payload::text, ' ') from public.entrees where user_id = '${id}'`)
+    expect(brut).not.toContain(aliment.id)
+    expect(brut).not.toContain('152.5')
   })
 
   it('un client anonyme ne lit aucune ligne alors que des lignes existent', async () => {

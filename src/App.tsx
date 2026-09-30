@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { HashRouter } from 'react-router-dom'
+import Application from './Application.tsx'
+import { FournisseurDonnees } from './donnees.tsx'
 import CreationCompte from './ecrans/CreationCompte.tsx'
 import Deverrouillage from './ecrans/Deverrouillage.tsx'
 import { compteExiste } from './lib/auth.ts'
+import { depotSupabase } from './lib/depot.ts'
 import { demarrerVeille } from './lib/session.ts'
 import { configurationPresente } from './lib/supabase.ts'
 
@@ -61,12 +64,9 @@ export default function App() {
     case 'ouverte':
       return (
         <HashRouter>
-          <div className="ecran">
-            <div className="contenu centre">
-              <h1>SAYAN</h1>
-              <p className="attenue">Déverrouillé.</p>
-            </div>
-          </div>
+          <FournisseurDonnees depot={depotSupabase}>
+            <Application />
+          </FournisseurDonnees>
         </HashRouter>
       )
   }
