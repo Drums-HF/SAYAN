@@ -5,6 +5,7 @@ import { NIVEAUX, type NiveauActivite, type Profil, type Sexe } from '../lib/typ
 import { lirePoids, lirePositif } from '../lib/validation.ts'
 
 export const OBJECTIF_CALORIQUE_DEFAUT = 1500
+const LONGUEUR_MAX_PRENOM = 40
 
 interface Props {
   initial: Partial<Profil>
@@ -16,6 +17,7 @@ interface Props {
 
 export default function FormulaireProfil({ initial, avecDateDebut, libelleValidation, surValidation }: Props) {
   const texte = (n: number | undefined) => (n === undefined ? '' : formatSaisie(n))
+  const [prenom, setPrenom] = useState(initial.prenom ?? '')
   const [sexe, setSexe] = useState<Sexe | ''>(initial.sexe ?? '')
   const [naissance, setNaissance] = useState(initial.date_naissance ?? '')
   const [taille, setTaille] = useState(texte(initial.taille_cm))
@@ -58,6 +60,7 @@ export default function FormulaireProfil({ initial, avecDateDebut, libelleValida
         niveau_activite: niveau,
         objectif_calorique: o.valeur,
         ...(pr?.ok ? { objectif_proteines_g: pr.valeur } : {}),
+        ...(prenom.trim() ? { prenom: prenom.trim().slice(0, LONGUEUR_MAX_PRENOM) } : {}),
         ...(avecDateDebut ? { date_debut: debut } : {}),
         ...(initial.dernier_export ? { dernier_export: initial.dernier_export } : {}),
       })
@@ -69,6 +72,16 @@ export default function FormulaireProfil({ initial, avecDateDebut, libelleValida
 
   return (
     <form className="pile" style={{ gap: 16 }} onSubmit={valider}>
+      <label className="champ">
+        Prénom (facultatif)
+        <input
+          value={prenom}
+          maxLength={LONGUEUR_MAX_PRENOM}
+          autoComplete="given-name"
+          autoCapitalize="words"
+          onChange={(e) => setPrenom(e.target.value)}
+        />
+      </label>
       <label className="champ">
         Sexe
         <select value={sexe} onChange={(e) => setSexe(e.target.value as Sexe)}>

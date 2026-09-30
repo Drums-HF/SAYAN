@@ -5,6 +5,7 @@ import { useDerives } from '../derives.ts'
 import { apport, deficitDuJour, depenseJournaliere, TOTAUX_NULS } from '../lib/calculs.ts'
 import { ajouterJours, aujourdhui, dateParDefaut, estDateValide, libelleCourt, libelleJour } from '../lib/dates.ts'
 import { formatEstimation, formatGrammes, formatKcal, formatSaisie } from '../lib/nombres.ts'
+import { salutation } from '../lib/salutation.ts'
 import type { Aliment, Entree } from '../lib/types.ts'
 import { lireGrammes } from '../lib/validation.ts'
 import { Anneau, Barre } from '../ui/composants.tsx'
@@ -78,7 +79,9 @@ export default function Journal() {
               <IconeSuivant />
             </button>
           </div>
-          <h1>{titreDate(date)}</h1>
+          <h1>
+            {profil.prenom && date === dateDefaut ? `${salutation()}, ${profil.prenom}` : titreDate(date)}
+          </h1>
         </div>
         <Link className="bouton-rond" to="/reglages" aria-label="Réglages">
           <IconeReglages />

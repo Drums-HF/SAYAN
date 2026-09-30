@@ -106,6 +106,7 @@ function verifierProfil(p: unknown): p is Profil {
     ['sedentaire', 'leger', 'modere', 'actif', 'tres_actif'].includes(x.niveau_activite as string) &&
     estNombre(x.objectif_calorique) &&
     (x.objectif_proteines_g === undefined || estNombre(x.objectif_proteines_g)) &&
+    (x.prenom === undefined || estTexte(x.prenom)) &&
     estTexte(x.date_debut) &&
     estDateValide(x.date_debut)
   )

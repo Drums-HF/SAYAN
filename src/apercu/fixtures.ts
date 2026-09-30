@@ -92,6 +92,7 @@ export function creerDonneesApercu(avecProfil = true): Donnees {
   return {
     profil: avecProfil
       ? {
+          prenom: 'Alex',
           sexe: 'homme',
           date_naissance: '1988-02-29',
           taille_cm: 180,
