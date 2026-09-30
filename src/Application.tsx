@@ -6,9 +6,11 @@ import Catalogue from './ecrans/catalogue/Catalogue.tsx'
 import EditionAliment, { NouvelAlimentManuel } from './ecrans/catalogue/EditionAliment.tsx'
 import Initialisation from './ecrans/Initialisation.tsx'
 import Journal from './ecrans/Journal.tsx'
+import Pesee from './ecrans/Pesee.tsx'
 
 const ONGLETS = [
   { chemin: '/journal', libelle: 'Journal' },
+  { chemin: '/pesee', libelle: 'Pesée' },
   { chemin: '/catalogue', libelle: 'Catalogue' },
 ]
 
@@ -19,6 +21,7 @@ export default function Application() {
     <div className="ecran">
       <Routes>
         <Route path="/journal" element={<Journal />} />
+        <Route path="/pesee" element={<Pesee />} />
         <Route path="/catalogue" element={<Catalogue />} />
         <Route path="/catalogue/ciqual" element={<AjoutCiqual />} />
         <Route path="/catalogue/code-barres" element={<AjoutCodeBarres />} />
