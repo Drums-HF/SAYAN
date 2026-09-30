@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs'
 import { deflateSync } from 'node:zlib'
 
 const FOND = [0, 0, 0]
-const ACCENT = [0x4f, 0x7c, 0xff]
+const ACCENT = [0xc8, 0xf5, 0x60]
 const TEXTE = [0xf5, 0xf5, 0xf5]
 
 const TABLE = Array.from({ length: 256 }, (_, n) => {

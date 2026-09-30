@@ -5,6 +5,7 @@ import { formatKcal } from '../../lib/nombres.ts'
 import { indexer, rechercher } from '../../lib/recherche.ts'
 import { LIBELLES_SOURCE, type Aliment, type Source } from '../../lib/types.ts'
 import { ChampRecherche, EnTete, Segments } from '../../ui/composants.tsx'
+import { IconeCodeBarres } from '../../ui/icones.tsx'
 
 type Filtre = 'tous' | Source | 'archives'
 
@@ -35,15 +36,16 @@ export default function Catalogue() {
 
   return (
     <div className="contenu">
-      <EnTete titre="Catalogue" />
-      <div className="ligne" style={{ gap: 8 }}>
-        <Link className="bouton" to="/catalogue/code-barres" style={{ flex: 1 }}>
-          Code-barres
+      <EnTete titre="Catalogue" surtitre={`${filtres.length} aliment${filtres.length > 1 ? 's' : ''}`} />
+      <div className="tuiles">
+        <Link className="bouton" to="/catalogue/scanner">
+          <IconeCodeBarres />
+          Scanner
         </Link>
-        <Link className="bouton" to="/catalogue/ciqual" style={{ flex: 1 }}>
+        <Link className="bouton" to="/catalogue/ciqual">
           CIQUAL
         </Link>
-        <Link className="bouton" to="/catalogue/nouveau" style={{ flex: 1 }}>
+        <Link className="bouton" to="/catalogue/nouveau">
           Manuel
         </Link>
       </div>
@@ -63,9 +65,6 @@ export default function Catalogue() {
           ))}
         </ul>
       )}
-      <p className="petit discret">
-        {filtres.length} aliment{filtres.length > 1 ? 's' : ''}
-      </p>
     </div>
   )
 }
@@ -75,7 +74,7 @@ export function LigneAliment({ aliment, detail }: { aliment: Aliment; detail?: s
     <>
       <span className="etire pile" style={{ gap: 2, minWidth: 0 }}>
         <span className="tronque">{aliment.nom}</span>
-        <span className="petit discret tronque">
+        <span className="sous-titre tronque">
           {detail ?? [aliment.marque, LIBELLES_SOURCE[aliment.source]].filter(Boolean).join(' · ')}
         </span>
       </span>

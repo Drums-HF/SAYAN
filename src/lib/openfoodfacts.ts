@@ -10,6 +10,8 @@ export interface Prerempli {
   nom: string
   marque: string | null
   code_barres: string
+  /** Photo du produit (affichage seulement, jamais stockée). */
+  image: string | null
   kcal: number | null
   glucides: number | null
   proteines: number | null
@@ -30,7 +32,7 @@ export function codeBarresValide(code: string): boolean {
 
 export function urlProduit(code: string): string {
   const params = new URLSearchParams({
-    fields: 'product_name,product_name_fr,brands,nutriments',
+    fields: 'product_name,product_name_fr,brands,nutriments,image_front_small_url',
     app_name: APP_NAME,
     app_version: APP_VERSION,
   })
@@ -56,6 +58,7 @@ interface ReponseOff {
     product_name?: unknown
     product_name_fr?: unknown
     brands?: unknown
+    image_front_small_url?: unknown
     nutriments?: Record<string, unknown>
   }
 }
@@ -66,6 +69,7 @@ export function interpreterReponse(code: string, reponse: ReponseOff | null): Re
     nom: '',
     marque: null,
     code_barres: code,
+    image: null,
     kcal: null,
     glucides: null,
     proteines: null,
@@ -89,6 +93,7 @@ export function interpreterReponse(code: string, reponse: ReponseOff | null): Re
   }
   const marque = texte(produit.brands)?.split(',')[0].trim() ?? null
   const nom = texte(produit.product_name_fr) ?? texte(produit.product_name) ?? ''
+  const image = texte(produit.image_front_small_url)?.startsWith('https://') ? texte(produit.image_front_small_url) : null
   const r = normaliser(brutes)
 
   if (r.ok) {
@@ -98,6 +103,7 @@ export function interpreterReponse(code: string, reponse: ReponseOff | null): Re
         nom,
         marque,
         code_barres: code,
+        image,
         // Énergie reconstituée : laissée vide dans le formulaire, qui la recalcule par Atwater.
         kcal: r.kcal_estimee ? null : r.valeurs.kcal,
         glucides: r.valeurs.glucides,
@@ -119,6 +125,7 @@ export function interpreterReponse(code: string, reponse: ReponseOff | null): Re
       nom,
       marque,
       code_barres: code,
+      image,
       kcal: plausible(kcal, 900),
       glucides: plausible(brutes.glucides, 100),
       proteines: plausible(brutes.proteines, 100),

@@ -1,83 +1,63 @@
-import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useActions, useDonnees } from '../../contexte.ts'
-import { chercherProduit, codeBarresValide, type ResultatOff } from '../../lib/openfoodfacts.ts'
+import { chercherProduit, type ResultatOff } from '../../lib/openfoodfacts.ts'
 import { Chargement, EnTete } from '../../ui/composants.tsx'
+import LecteurCode from '../ajout/LecteurCode.tsx'
 import FormulaireAliment from './FormulaireAliment.tsx'
 
+/** Ajout au catalogue par code-barres : caméra, puis validation des valeurs (§6, §7.3). */
 export default function AjoutCodeBarres() {
   const { aliments } = useDonnees()
   const actions = useActions()
   const naviguer = useNavigate()
-  const [code, setCode] = useState('')
-  const [message, setMessage] = useState<string | null>(null)
-  const [enCours, setEnCours] = useState(false)
+  const [code, setCode] = useState<string | null>(null)
   const [resultat, setResultat] = useState<ResultatOff | null>(null)
 
-  const existant = codeBarresValide(code) ? aliments.find((a) => a.code_barres === code) : undefined
-
-  async function chercher(e: FormEvent) {
-    e.preventDefault()
-    if (!codeBarresValide(code)) {
-      setMessage('Code-barres : 8, 12 ou 13 chiffres.')
+  async function surCode(lu: string) {
+    // Déjà au catalogue : aucune requête réseau.
+    const connu = aliments.find((a) => a.code_barres === lu)
+    if (connu) {
+      naviguer(`/catalogue/${connu.id}`, { replace: true })
       return
     }
-    // Déjà enregistré : aucune requête réseau.
-    if (existant) return
-    setMessage(null)
-    setEnCours(true)
-    setResultat(await chercherProduit(code))
-    setEnCours(false)
+    setCode(lu)
+    setResultat(await chercherProduit(lu))
   }
 
-  if (resultat) {
-    const produit = resultat.type === 'produit'
+  if (!code) return <LecteurCode surCode={surCode} surFermer={() => naviguer(-1)} />
+
+  if (!resultat) {
     return (
       <div className="contenu">
-        <EnTete titre={produit ? 'Open Food Facts' : 'Saisie manuelle'} retour />
-        {!produit && <p className="message">{resultat.raison}</p>}
-        <FormulaireAliment
-          initial={resultat.prerempli}
-          source={produit ? 'openfoodfacts' : 'manuel'}
-          sourceRef={produit ? resultat.prerempli.code_barres : null}
-          controleCoherence={produit}
-          libelleValidation="Enregistrer dans le catalogue"
-          surValidation={async (a) => {
-            await actions.ajouterAliment(a)
-            naviguer(-1)
-          }}
-        />
+        <EnTete titre="Code-barres" retour />
+        <Chargement texte={`Code ${code}…`} />
       </div>
     )
   }
 
+  const produit = resultat.type === 'produit'
   return (
-    <form className="contenu" onSubmit={chercher}>
-      <EnTete titre="Code-barres" retour />
-      <input
-        inputMode="numeric"
-        pattern="[0-9]*"
-        autoComplete="off"
-        autoFocus
-        placeholder="8, 12 ou 13 chiffres"
-        value={code}
-        onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-        disabled={enCours}
+    <div className="contenu">
+      <EnTete titre={produit ? 'Open Food Facts' : 'Saisie manuelle'} retour />
+      {!produit && <p className="message">{resultat.raison}</p>}
+      {produit && resultat.prerempli.image && (
+        <div className="produit">
+          <img src={resultat.prerempli.image} alt="" referrerPolicy="no-referrer" />
+        </div>
+      )}
+      <FormulaireAliment
+        initial={resultat.prerempli}
+        source={produit ? 'openfoodfacts' : 'manuel'}
+        sourceRef={produit ? resultat.prerempli.code_barres : null}
+        controleCoherence={produit}
+        libelleValidation="Enregistrer dans le catalogue"
+        surValidation={async (a) => {
+          await actions.ajouterAliment(a)
+          naviguer(-1)
+        }}
       />
-      {existant && (
-        <p className="message">
-          Déjà dans le catalogue : <Link to={`/catalogue/${existant.id}`}>{existant.nom}</Link>
-        </p>
-      )}
-      {message && <p className="message">{message}</p>}
-      {enCours ? (
-        <Chargement texte="Interrogation d’Open Food Facts…" />
-      ) : (
-        <button className="bouton principal plein" disabled={!code || Boolean(existant)}>
-          Rechercher
-        </button>
-      )}
-      <p className="petit discret">Données Open Food Facts, licence ODbL.</p>
-    </form>
+      <p className="tres-petit discret">Données Open Food Facts, licence ODbL.</p>
+    </div>
   )
 }

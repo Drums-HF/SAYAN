@@ -13,11 +13,11 @@ const DELAI_RAPPEL_EXPORT = 30
 export default function Reglages() {
   return (
     <div className="contenu">
-      <EnTete titre="Réglages" />
+      <EnTete titre="Réglages" retour />
       <SectionExport />
       <SectionProfil />
       <SectionJalons />
-      <section className="pile">
+      <section className="carte">
         <h2>Session</h2>
         <button className="bouton plein" onClick={() => window.location.reload()}>
           Verrouiller
@@ -32,7 +32,7 @@ function SectionProfil() {
   const actions = useActions()
   const [enregistre, setEnregistre] = useState(false)
   return (
-    <section className="pile" style={{ gap: 12 }}>
+    <section className="carte">
       <h2>Profil et objectifs</h2>
       <FormulaireProfil
         initial={profil}
@@ -87,7 +87,7 @@ function SectionJalons() {
   }
 
   return (
-    <section className="pile" style={{ gap: 12 }}>
+    <section className="carte">
       <h2>Jalons mensuels</h2>
       <p className="petit discret">Poids visé au dernier jour du mois.</p>
       {jalons.length > 0 && (
@@ -97,7 +97,7 @@ function SectionJalons() {
           ))}
         </ul>
       )}
-      <form className="carte" onSubmit={ajouter}>
+      <form className="pile" style={{ gap: 12 }} onSubmit={ajouter}>
         <div className="grille-2">
           <label className="champ">
             Mois
@@ -241,7 +241,7 @@ function SectionExport() {
   }
 
   return (
-    <section className="pile" style={{ gap: 12 }}>
+    <section className="carte">
       <h2>Export et sauvegarde</h2>
       <p className={rappel ? 'petit attenue' : 'petit discret'}>
         {dernier ? `Dernier export : ${libelleJour(dernier)}.` : 'Aucun export.'}

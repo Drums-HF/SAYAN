@@ -67,3 +67,19 @@ export function regularite(totauxJours: Map<string, Totaux>, debutSuivi: string,
   }
   return resultat
 }
+
+/**
+ * Évolution de la moyenne glissante (§7.6) sur la plage : dernier point lissé moins premier
+ * point lissé de la plage. null s'il y en a moins de deux.
+ */
+export function evolutionPoids(pointsLisses: { date: string; kg: number }[], plage: Plage): number | null {
+  const dans = pointsLisses.filter((p) => p.date >= plage.debut && p.date <= plage.fin)
+  return dans.length >= 2 ? dans[dans.length - 1].kg - dans[0].kg : null
+}
+
+/** Nombre de jours renseignés sur la plage et nombre de jours de la plage. */
+export function joursRenseignes(totauxJours: Map<string, Totaux>, plage: Plage): { renseignes: number; total: number } {
+  let renseignes = 0
+  for (const date of totauxJours.keys()) if (date >= plage.debut && date <= plage.fin) renseignes++
+  return { renseignes, total: ecartJours(plage.debut, plage.fin) + 1 }
+}
